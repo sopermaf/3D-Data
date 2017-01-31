@@ -6,6 +6,7 @@
     
     <body>
         <script src="http://mrdoob.github.com/three.js/build/three.min.js"></script>
+        <script src="https://stemkoski.github.io/Three.js/js/OrbitControls.js"></script>
         
         <script>
             function makeCube (x, y, z, cubeColor) {
@@ -17,25 +18,31 @@
             }; 
         
             var scene = new THREE.Scene();
-            var camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 1, 10000);
+            //var camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 1, 10000);
             var renderer = new THREE.WebGLRenderer();
             renderer.setSize(window.innerWidth, window.innerHeight);
             document.body.appendChild(renderer.domElement);
             
             //set camera and mesh positions
-            camera.position.z = 50;
-            camera.position.set(50, 20, 50);
+            // Create a camera, zoom it out from the model a bit, and add it to the scene.
+            var camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 1, 10000);
+            camera.position.set(50,16,50);
+            scene.add(camera);
             
-            //setup cubes
-            var year1 = makeCube(10, 10, 10, new THREE.Color('skyblue'));
-            var year2 = makeCube(10, 20, 10, new THREE.Color('red'));
+            //setup cubes and constants
+            var cube_dim = 10;
+            var year1 = makeCube(cube_dim, cube_dim, cube_dim, new THREE.Color('skyblue'));
+            var year2 = makeCube(cube_dim, cube_dim*2, cube_dim, new THREE.Color('red'));
+            var year3 = makeCube(cube_dim, cube_dim*3, cube_dim, new THREE.Color('green'));
             
             //add meshes to scene
             scene.add(year1);
             scene.add(year2);
+            scene.add(year3);
             
             //cube positions
-            year2.position.set(0, 5, -10);
+            year2.position.set(0, (cube_dim/2), -cube_dim);
+            year3.position.set(0, cube_dim, -(2*cube_dim));
             
             //main function
             function render() {
@@ -45,7 +52,7 @@
                 //cube.rotation.y += 0.01;
                 
                 //***DO SINE FUNCTION OF CAMERA POSITION TO ROTATE IN CIRCLE**
-                camera.lookAt( year1.position );
+                camera.lookAt( year2.position );
                 renderer.render(scene, camera);
             };
             
