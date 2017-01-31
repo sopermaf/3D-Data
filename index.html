@@ -8,12 +8,12 @@
         <script src="http://mrdoob.github.com/three.js/build/three.min.js"></script>
         
         <script>
-            function makeCube () {
-                var geo2 = new THREE.BoxGeometry(100, 70, 70, 10, 10, 10);
-                var mat2 = new THREE.MeshBasicMaterial( { color: 0xffff00 } );
-                var cube2 = new THREE.Mesh(geo2, mat2);
+            function makeCube (x, y, z, cubeColor) {
+                var geometry = new THREE.BoxGeometry(x, y, z);
+                var material = new THREE.MeshBasicMaterial( { color: cubeColor} );
+                var newCube = new THREE.Mesh(geometry, material);
                 
-                return cube2;
+                return newCube;
             }; 
         
             var scene = new THREE.Scene();
@@ -22,25 +22,20 @@
             renderer.setSize(window.innerWidth, window.innerHeight);
             document.body.appendChild(renderer.domElement);
             
-            //cube setup
-            var geometry = new THREE.BoxGeometry(700, 700, 700, 2, 2, 2);
-            var material = new THREE.MeshBasicMaterial({color: 0xfffff, wireframe: true});
-            var cube = new THREE.Mesh(geometry, material);
-            
-            //2nd cube setup
-            var geo2 = new THREE.BoxGeometry(1000, 70, 70, 10, 10, 10);
-            var mat2 = new THREE.MeshBasicMaterial( { color: 0xffff00 } );
-            var cube2 = makeCube();
-            
             //set camera and mesh positions
-            camera.position.z = 1000;
-            // = new THREE.Vector3(0, 100, 100);
+            camera.position.z = 50;
+            camera.position.set(50, 20, 50);
+            
+            //setup cubes
+            var year1 = makeCube(10, 10, 10, new THREE.Color('skyblue'));
+            var year2 = makeCube(10, 20, 10, new THREE.Color('red'));
             
             //add meshes to scene
-            scene.add(cube);
-            scene.add(cube2);
+            scene.add(year1);
+            scene.add(year2);
             
-            cube2.position.set(0,300,100);
+            //cube positions
+            year2.position.set(0, 5, -10);
             
             //main function
             function render() {
@@ -49,6 +44,8 @@
                 //cube.position.x += 10;
                 //cube.rotation.y += 0.01;
                 
+                //***DO SINE FUNCTION OF CAMERA POSITION TO ROTATE IN CIRCLE**
+                camera.lookAt( year1.position );
                 renderer.render(scene, camera);
             };
             
