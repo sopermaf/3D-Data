@@ -31,23 +31,17 @@
             //multiface mesh
             var materials = [
                 new THREE.MeshLambertMaterial({
-                    ambient: 0xffffff,
-                    map: THREE.ImageUtils.loadTexture( 'images/red.png' ) }),   //x facing
+                    map: new THREE.TextureLoader().load( 'images/red.png' ) }),   //x facing
                 new THREE.MeshLambertMaterial({
-                    ambient: 0xffffff,
-                    map: THREE.ImageUtils.loadTexture( 'images/red.png' ) }),
+                    map: new THREE.TextureLoader().load( 'images/red.png' ) }),
                 new THREE.MeshLambertMaterial({
-                    ambient: 0xffffff,
-                    map: THREE.ImageUtils.loadTexture( 'images/red.png' ) }),   //y facing
+                    map: new THREE.TextureLoader().load( 'images/red.png' ) }),   //y facing
                 new THREE.MeshLambertMaterial({
-                    ambient: 0xffffff,
-                    map: THREE.ImageUtils.loadTexture( 'images/red.png' ) }),
+                    map: new THREE.TextureLoader().load( 'images/red.png' ) }),
                 new THREE.MeshLambertMaterial({
-                    ambient: 0xffffff,
-                    map: THREE.ImageUtils.loadTexture( 'images/student1.jpg' ) }),  //z facing
+                    map: new THREE.TextureLoader().load( 'images/student1.jpg' ) }),  //z facing
                 new THREE.MeshLambertMaterial( {
-                    ambient: 0xffffff,
-                    map: THREE.ImageUtils.loadTexture( 'images/red.png' ) })
+                    map: new THREE.TextureLoader().load( 'images/red.png' ) })
             ];
             
             var loader = new THREE.TextureLoader();     //NEW method of loading textures
@@ -93,17 +87,25 @@
             year2.position.set(0, (cube_dim/2), -cube_dim);
             year3.position.set(0, cube_dim, -(2*cube_dim));
             
-            curr = 0;
+            //orbit controls
+            /* GETTING ERROR FOR STACK SIZE TOO BIG*** 
+            controls = new THREE.OrbitControls( camera );
+            controls.addEventListener( 'change', render );*/
+            
+            
+            var angle = 0, x_place, z_place, distance_cam = 100;    //for moving camera
+            
             //main function
             function render() {
                 requestAnimationFrame(render);
-                //cube.rotation.x += 0.01;
-                //cube.position.x += 10;
                 
-                //***DO SINE FUNCTION OF CAMERA POSITION TO ROTATE IN CIRCLE**
-                curr += 0.1;
-                camera.position.x = 50 * Math.sin(curr);
-                camera.lookAt( year2.position );
+                //***DO FUNCTION OF CAMERA POSITION TO ROTATE IN CIRCLE**
+                angle += 0.1;
+                x_place = Math.sin(angle) * distance_cam;
+                z_place = Math.cos(angle) * distance_cam;
+                
+                camera.position.set(x_place, 20, z_place);
+                camera.lookAt(year2.position);
                 renderer.render(scene, camera);
             };
             
