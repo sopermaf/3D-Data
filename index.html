@@ -9,19 +9,68 @@
         <script src="https://stemkoski.github.io/Three.js/js/OrbitControls.js"></script>
         
         <script>
-            function makeCube (x, y, z, cubeColor) {
+            function makeCube (x, y, z, cubeColor, useImage) {
                 var geometry = new THREE.BoxGeometry(x, y, z);
-                var material = new THREE.MeshBasicMaterial( { color: cubeColor} );
-                var newCube = new THREE.Mesh(geometry, material);
+                
+                //var material = new THREE.MeshBasicMaterial( { color: cubeColor, wireframe:true} );
+                
+               var material = new THREE.MeshPhongMaterial( {color: cubeColor, specular: 0x555555, shininess: 100, emissive: 0x000000} );
+               var newCube = new THREE.Mesh(geometry, material);
+               
+                if (useImage === true) {
+                    var texture = new THREE.TextureLoader().load( 'images/student4.jpg' );
+                    material = new THREE.MeshPhongMaterial( { map: texture } );
+                    
+                    newCube = new THREE.Mesh( geometry, new THREE.MultiMaterial(materials))
+                }
+                
                 
                 return newCube;
             }; 
-        
+            
+            //multiface mesh
+            var materials = [
+                new THREE.MeshLambertMaterial({
+                    ambient: 0xffffff,
+                    map: THREE.ImageUtils.loadTexture( 'images/red.png' ) }),   //x facing
+                new THREE.MeshLambertMaterial({
+                    ambient: 0xffffff,
+                    map: THREE.ImageUtils.loadTexture( 'images/red.png' ) }),
+                new THREE.MeshLambertMaterial({
+                    ambient: 0xffffff,
+                    map: THREE.ImageUtils.loadTexture( 'images/red.png' ) }),   //y facing
+                new THREE.MeshLambertMaterial({
+                    ambient: 0xffffff,
+                    map: THREE.ImageUtils.loadTexture( 'images/red.png' ) }),
+                new THREE.MeshLambertMaterial({
+                    ambient: 0xffffff,
+                    map: THREE.ImageUtils.loadTexture( 'images/student1.jpg' ) }),  //z facing
+                new THREE.MeshLambertMaterial( {
+                    ambient: 0xffffff,
+                    map: THREE.ImageUtils.loadTexture( 'images/red.png' ) })
+            ];
+            
+            var loader = new THREE.TextureLoader();     //NEW method of loading textures
             var scene = new THREE.Scene();
-            //var camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 1, 10000);
             var renderer = new THREE.WebGLRenderer();
             renderer.setSize(window.innerWidth, window.innerHeight);
             document.body.appendChild(renderer.domElement);
+            
+            //add light source NEED FOR PHONG MATERIALS
+            var light1 = new THREE.DirectionalLight( 0xffffff);
+            var light2 = new THREE.DirectionalLight(0xffffff)
+            light1.position.set(10, 70, 10);
+            light2.position.set(-10, 70, 0);
+            
+            var ambientLight = new THREE.AmbientLight(0x111111, 20);
+            ambientLight.position.set(0, 50, -5);
+            
+            //scene.add(light1);
+            //scene.add(light2);
+            scene.add(ambientLight);
+            
+            var axisHelper = new THREE.AxisHelper(70);
+            scene.add( axisHelper );
             
             //set camera and mesh positions
             // Create a camera, zoom it out from the model a bit, and add it to the scene.
@@ -30,10 +79,10 @@
             scene.add(camera);
             
             //setup cubes and constants
-            var cube_dim = 10;
-            var year1 = makeCube(cube_dim, cube_dim, cube_dim, new THREE.Color('skyblue'));
-            var year2 = makeCube(cube_dim, cube_dim*2, cube_dim, new THREE.Color('red'));
-            var year3 = makeCube(cube_dim, cube_dim*3, cube_dim, new THREE.Color('green'));
+            var cube_dim = 20;
+            var year1 = makeCube(cube_dim, cube_dim, cube_dim, new THREE.Color('skyblue'), true);
+            var year2 = makeCube(cube_dim, cube_dim*2, cube_dim, new THREE.Color('yellow'), false);
+            var year3 = makeCube(cube_dim, cube_dim*3, cube_dim, new THREE.Color('green'), false);
             
             //add meshes to scene
             scene.add(year1);
@@ -44,14 +93,16 @@
             year2.position.set(0, (cube_dim/2), -cube_dim);
             year3.position.set(0, cube_dim, -(2*cube_dim));
             
+            curr = 0;
             //main function
             function render() {
                 requestAnimationFrame(render);
                 //cube.rotation.x += 0.01;
                 //cube.position.x += 10;
-                //cube.rotation.y += 0.01;
                 
                 //***DO SINE FUNCTION OF CAMERA POSITION TO ROTATE IN CIRCLE**
+                curr += 0.1;
+                camera.position.x = 50 * Math.sin(curr);
                 camera.lookAt( year2.position );
                 renderer.render(scene, camera);
             };
