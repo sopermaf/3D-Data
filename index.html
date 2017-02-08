@@ -41,25 +41,38 @@
             };
             
             //create group of year cubes for student
-            function makeStudent(student_id) {
+            function makeStudent(student_id, num_of_years) {
                 //setup cubes and constants
                 var cube_dim = 20;
-                var year1 = makeCube(cube_dim, cube_dim, cube_dim, new THREE.Color('skyblue'), true, student_id);
-                var year2 = makeCube(cube_dim, cube_dim*2, cube_dim, new THREE.Color('yellow'), false, student_id);
-                var year3 = makeCube(cube_dim, cube_dim*3, cube_dim, new THREE.Color('green'), false, student_id);
+                var year_colours = ["skyblue", "yellow", "green", "red", "purple", "pink"]
+                var year_group = new THREE.Object3D();       //create an empty container
                 
                 
-                year2.position.set(0, (cube_dim/2), -cube_dim);
-                year3.position.set(0, cube_dim, -(2*cube_dim));
+                for (i = 0; i < num_of_years; i++) {
+                    var needs_face = false;
+                    if (i ==0) {    //only first cube needs face
+                        needs_face = true;
+                    }
+                    //create the year cube
+                    var year = makeCube(cube_dim, cube_dim, cube_dim, new THREE.Color(year_colours[i]), needs_face, student_id);
+                    
+                    //translate it back
+                    year.position.set(0,0, -(i*cube_dim));
+                    
+                    //add it to the student group of years
+                    year_group.add(year);
+                }
                 
-                var group = new THREE.Object3D();//create an empty container
-                group.add( year1 );//add a mesh with geometry to it
-                group.add( year2 );//add a mesh with geometry to it
-                group.add( year3 );//add a mesh with geometry to it
+                //****PART OF THE STAIRCASE GEOMETRY*******
+                //var year2 = makeCube(cube_dim, cube_dim*2, cube_dim, new THREE.Color('yellow'), false, student_id);
+                //var year3 = makeCube(cube_dim, cube_dim*3, cube_dim, new THREE.Color('green'), false, student_id);
+                //year2.position.set(0, (cube_dim/2), -cube_dim);
+                //year3.position.set(0, cube_dim, -(2*cube_dim));
                 
-                return group;
+                return year_group;
             }
             
+            //mouse movement
             var cursorX=0, oldCursorX;
             var cursorY=0, oldCursorY;
             document.onmousemove = function(e){
@@ -69,9 +82,33 @@
                 cursorX = e.pageX;
                 cursorY = e.pageY;
             }
-            setInterval("checkCursor()", 10);
-            function checkCursor(){
-                //console.log("Cursor at: " + cursorX + ", " + cursorY);
+            
+            //key movement
+            var camera_x = 10, camera_y = 30, camera_z = 80;
+            
+            document.onkeydown = function(e) {
+               //z 
+               if (e.which == 87) {
+                    camera_z--;
+               } else if (e.which == 83) {
+                    camera_z++;
+               }
+               
+               //x
+               if (e.which == 68) {
+                    camera_x++;
+               } else if (e.which == 65) {
+                    camera_x--;
+               }
+               
+               //rotate y
+               if (e.which == 82) { //r
+                    camera.rotation.y++;
+               } else if (e.which == 84) { //t
+                    camera_x--;
+               }
+               
+               console.log(e.which);
             }
             
             var loader = new THREE.TextureLoader();     //NEW method of loading textures
@@ -103,9 +140,9 @@
             scene.add(camera);
             
             //add meshes to scene
-            var group = makeStudent(1);
-            var group2 = makeStudent(2);
-            var group3 = makeStudent(3);
+            var group = makeStudent(1,2);
+            var group2 = makeStudent(2,5);
+            var group3 = makeStudent(3,3);
             
             group2.position.set(20,0,0);    //improve this for animation**********
             group3.position.set(40,0,0);
@@ -114,7 +151,7 @@
             scene.add(group3);
             scene.add( group );//when done, add the group to the scene
             
-            var angle=0, x_angle = 0, z_angle=0, x_place=0, z_place=100, distance_cam = 100;    //for moving camera
+            var angle=0, x_angle = 0, z_angle=0, x_place=0, z_place=100, distance_cam = 150;    //for moving camera
             
             function mouseCamera() {
                 //X position
@@ -137,18 +174,25 @@
                 camera.position.set(x_place, 20, z_place);
             }
             
+            
             //main function
             function render() {
                 requestAnimationFrame(render);
                 
                 //***DO FUNCTION OF CAMERA POSITION TO ROTATE IN CIRCLE**
-                /*angle += 0.1;*/
+                angle += 0.025;
+                camera_x = Math.cos(angle)*distance_cam;
+                camera_z = Math.sin(angle)*distance_cam;
                
                 
                 //move the camera based on mouse
                 //mouseCamera();
-                
+                //key controls
                 camera.lookAt(group.position);
+                camera.position.set(camera_x, camera_y, camera_z);
+                //console.log("(" + camera_x  + "," + camera_y + "," + camera_z + ")")
+                
+                
                 renderer.render(scene, camera);
             };
             
