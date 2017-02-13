@@ -12,6 +12,8 @@
         
         
         <script>
+            var cube_dim = 20;
+            
             function makeCube (x, y, z, cubeColor, useImage, student_num) {  //color based on year
                 var geometry = new THREE.BoxGeometry(x, y, z);
                 //var student_id = 2;
@@ -46,8 +48,7 @@
             //create group of year cubes for student
             function makeStudent(student_id, num_of_years) {
                 //setup cubes and constants
-                var cube_dim = 20;
-                var year_colours = ["skyblue", "yellow", "green", "red", "purple", "pink"]
+                var year_colours = ["red", "yellow", "green", "blue", "purple", "orange"]
                 var year_group = new THREE.Object3D();       //create an empty container
                 
                 
@@ -75,43 +76,32 @@
                 return year_group;
             }
             
-            //mouse movement
-            var cursorX=0, oldCursorX;
-            var cursorY=0, oldCursorY;
-            document.onmousemove = function(e){
-                oldCursorX = cursorX;
-                oldCursorY = cursorY;
-                
-                cursorX = e.pageX;
-                cursorY = e.pageY;
+            function getRandomIntInclusive(min, max) {
+              min = Math.ceil(min);
+              max = Math.floor(max);
+              return Math.floor(Math.random() * (max - min + 1)) + min;
             }
             
-            //key movement
-            var camera_x = 10, camera_y = 30, camera_z = 80;
-            
-            document.onkeydown = function(e) {
-               //z 
-               if (e.which == 87) {
-                    camera_z--;
-               } else if (e.which == 83) {
-                    camera_z++;
-               }
-               
-               //x
-               if (e.which == 68) {
-                    camera_x++;
-               } else if (e.which == 65) {
-                    camera_x--;
-               }
-               
-               //rotate y
-               if (e.which == 82) { //r
-                    camera.rotation.y++;
-               } else if (e.which == 84) { //t
-                    camera_x--;
-               }
-               
-               console.log(e.which);
+            //create a sample class group ***NOT WORKING***
+            function createStudentClass(class_size) {
+               // var student;
+                var numberPerRow = 3;
+                var classSet = new Array(class_size);
+                
+                for (i = 0; i < class_size; i++) {
+                   var y_mult = parseInt(i/numberPerRow);
+                   var student = makeStudent((i+1), getRandomIntInclusive(2,5));
+                   
+                   student.position.set((cube_dim*i), 0, 0);
+                   classSet.push(makeStudent((i+1), getRandomIntInclusive(2,5)));
+                   classSet[i].position.set(0,0,0);
+                   
+                   scene.add(classSet[i]); //when done, add the group to the scene
+  
+                   console.log("iteration " + i);
+                   console.log("y = " + y_mult);
+                   console.log("x = " + (cube_dim*(i+1)));
+                }
             }
             
             var loader = new THREE.TextureLoader();     //NEW method of loading textures
@@ -141,23 +131,46 @@
             var camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 1, 10000);
             camera.position.set(50,16,50);
             scene.add(camera);
-            
-            //add meshes to scene
-            var group = makeStudent(1,2);
-            var group2 = makeStudent(2,5);
-            var group3 = makeStudent(3,3);
-            
-            group2.position.set(20,0,0);    //improve this for animation**********
-            group3.position.set(40,0,0);
-            
-            scene.add(group2);
-            scene.add(group3);
-            scene.add( group );//when done, add the group to the scene            
-            
-            camera.position.set(camera_x, camera_y, camera_z);
+            //camera setup
+            camera.position.set(10, 50, 80);
             var cameraControls;
             cameraControls = new THREE.TrackballControls(camera, renderer.domElement);
             cameraControls.target.set( 0, 0, 0 )
+            
+            //**********Needs to be function for dynamic input of students
+            //add meshes to scene
+            var group1 = makeStudent(1,2);
+            var group2 = makeStudent(2,5);
+            var group3 = makeStudent(3,3);
+            var group4 = makeStudent(4,3);
+            var group5 = makeStudent(5,4);
+            var group6 = makeStudent(6,5);
+            var group7 = makeStudent(7,2);
+            var group8 = makeStudent(8,4);
+            
+            group1.position.set(0,0,0);
+            group2.position.set(cube_dim,0,0);    //improve this for autoadding**********
+            group3.position.set(cube_dim*2,0,0);
+            
+            group4.position.set(0,cube_dim,0);
+            group5.position.set(cube_dim,cube_dim,0);
+            group6.position.set(cube_dim*2,cube_dim,0);
+            
+            group7.position.set(0,cube_dim*2,0);
+            group8.position.set(cube_dim,cube_dim*2,0);
+            
+            scene.add(group1);      
+            scene.add(group2);
+            scene.add(group3);
+            scene.add(group4);
+            scene.add(group5);
+            scene.add(group6);
+            scene.add(group7);
+            scene.add(group8);
+            //******************8
+           // createStudentClass(4);    //NOT WORKING
+            
+            
             var clock = new THREE.Clock();
             var delta;
             
