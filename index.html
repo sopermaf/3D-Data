@@ -18,25 +18,52 @@
                 var geometry = new THREE.BoxGeometry(x, y, z);
                 //var student_id = 2;
                 
-               var material = new THREE.MeshPhongMaterial( {color: cubeColor, specular: 0x555555, shininess: 100, emissive: 0x000000} );
+               var material = new THREE.MeshPhongMaterial( {color: cubeColor, specular: 0x555555, shininess: 100, emissive: 0x000000, transparent: false, opacity: 0.25} );
                var newCube = new THREE.Mesh(geometry, material);
                
                 if (useImage === true) {
                     var student_photo = "images/student" + student_num + ".jpg"  //load in the student number??
                     var materials = [
+                        new THREE.MeshLambertMaterial({     //x facing
+                            map: new THREE.TextureLoader().load( 'images/red.png' ),
+                            transparent: false,
+                            opacity: 0.25,
+                            color: 0xFF0000}),   
                         new THREE.MeshLambertMaterial({
-                            map: new THREE.TextureLoader().load( 'images/red.png' ) }),   //x facing
+                            map: new THREE.TextureLoader().load( 'images/red.png' ),
+                            transparent: false,
+                            opacity: 0.25,
+                            color: 0xFF0000}),
+                        new THREE.MeshLambertMaterial({     //y facing
+                            map: new THREE.TextureLoader().load( 'images/red.png' ),
+                            transparent: false,
+                            opacity: 0.25,
+                            color: 0xFF0000}),
                         new THREE.MeshLambertMaterial({
-                            map: new THREE.TextureLoader().load( 'images/red.png' ) }),
+                            map: new THREE.TextureLoader().load( 'images/red.png' ),
+                            transparent: false,
+                            opacity: 0.25,
+                            color: 0xFF0000}),
+                        new THREE.MeshLambertMaterial({     //z facing
+                            map: new THREE.TextureLoader().load(student_photo),
+                            transparent: false,
+                            opacity: 0.25,
+                            color: 0xFFFFFF}),
                         new THREE.MeshLambertMaterial({
-                            map: new THREE.TextureLoader().load( 'images/red.png' ) }),   //y facing
-                        new THREE.MeshLambertMaterial({
-                            map: new THREE.TextureLoader().load( 'images/red.png' ) }),
-                        new THREE.MeshLambertMaterial({
-                            map: new THREE.TextureLoader().load(student_photo) }),  //z facing
-                        new THREE.MeshLambertMaterial( {
-                            map: new THREE.TextureLoader().load( 'images/red.png' ) })
+                            map: new THREE.TextureLoader().load( 'images/red.png' ),
+                            transparent: false,
+                            opacity: 0.25,
+                            color: 0xFF0000}),
                     ];
+                    
+                    /*var materials = [];
+                    materials.push(new THREE.MeshBasicMaterial( { map: THREE.ImageUtils.loadTexture( 'images/red.png' ), transparent: false, opacity: 0.5, color: 0xFF0000 }));
+                    materials.push(new THREE.MeshBasicMaterial( { map: THREE.ImageUtils.loadTexture( 'images/red.png' ), transparent: false, opacity: 0.5, color: 0xFF0000 }));
+                    materials.push(new THREE.MeshBasicMaterial( { map: THREE.ImageUtils.loadTexture( 'images/red.png' ), transparent: false, opacity: 0.5, color: 0xFF0000 }));
+                    materials.push(new THREE.MeshBasicMaterial( { map: THREE.ImageUtils.loadTexture( 'images/red.png' ), transparent: false, opacity: 0.5, color: 0xFF0000 }));
+                    materials.push(new THREE.MeshBasicMaterial( { map: THREE.ImageUtils.loadTexture( 'images/red.png' ), transparent: false, opacity: 0.5, color: 0xFF0000 }));
+                    materials.push(new THREE.MeshBasicMaterial( { map: THREE.ImageUtils.loadTexture( 'images/red.png' ), transparent: false, opacity: 0.5, color: 0xFF0000 }));
+                    var MovingCubeMat = new THREE.MeshFaceMaterial(materials);*/
                     
                     newCube = new THREE.Mesh( geometry, new THREE.MultiMaterial(materials))
                 }
@@ -109,11 +136,11 @@
             renderer.setSize(window.innerWidth, window.innerHeight);
             document.body.appendChild(renderer.domElement);
             
-            //add light source NEED FOR PHONG MATERIALS
-            var light1 = new THREE.DirectionalLight( 0xffffff);
+            //LIGHTING*** - NEEDED FOR PHONG MATERIALS
+            /*var light1 = new THREE.DirectionalLight( 0xffffff);
             var light2 = new THREE.DirectionalLight(0xffffff)
             light1.position.set(10, 70, 10);
-            light2.position.set(-10, 70, 0);
+            light2.position.set(-10, 70, 0);*/
             
             var ambientLight = new THREE.AmbientLight(0x111111, 20);
             ambientLight.position.set(0, 50, -5);
@@ -139,15 +166,18 @@
             //**********Needs to be function for dynamic input of students
             //add meshes to scene
             var class_group = new THREE.Object3D();
-            var num_per_row = 3;
+            var num_per_row = 4;
+            var number_of_students = 15;
             
-            for (k = 0; k < 8; k++) {
+            for (k = 0; k < number_of_students; k++) {
                 var y_offset = parseInt(k/num_per_row);
                 var x_offset = k%num_per_row;
-                console.log("for iteration " + k + " y offset is " + y_offset);
+                var pic_number = k+1;
+                var numberYears = getRandomIntInclusive(2,5);
                 
-                class_group.add(makeStudent(k+1,2, cube_dim*x_offset, cube_dim*y_offset, 0))
+                class_group.add(makeStudent(pic_number,numberYears, cube_dim*x_offset, cube_dim*y_offset, 0))
             }
+            
             
             scene.add(class_group);
             //******************
@@ -157,11 +187,68 @@
             var clock = new THREE.Clock();
             var delta;
             
+            var raycaster = new THREE.Raycaster();
+            var mouse = new THREE.Vector2();
+
+            function onMouseMove( event ) {
+
+                // calculate mouse position in normalized device coordinates
+                // (-1 to +1) for both components
+
+                mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+                mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+
+            }
+            
+            //class_group.children[0].visible = false;    //WORKS
+            //class_group.children[0].children[0].material.transparent = true;
+            //class_group.children[0].children[2].material.transparent = true;
+            
+            var index = 0, wait_index=0;
             //main function
             function render() {
                 requestAnimationFrame(render);                
+                
+                //***RAYCASTING****
+                // update the picking ray with the camera and mouse position
+                /*raycaster.setFromCamera( mouse, camera );
+                var intersects = raycaster.intersectObjects( scene.children );
+                for ( var i = 0; i < intersects.length; i++ ) {
+                    console.log("hit");
+                    intersects[ i ].object.material.color.set( 0xff0000 );
+                }*/
+                //***********************
+                
+                if (wait_index%15==0) {
+                    if(index >= number_of_students)
+                    index = 0;
+                
+                    prev = index-1;
+                    if (prev < 0) {prev = number_of_students - 1}
+                    
+                    /*for(i=0; i < 4; i++) {
+                         // console.log("hello");
+                        class_group.children[prev].children[i].material.transparent = false;
+                    }*/
+                    
+                    for(i=0; i < class_group.children[index].children.length; i++) {
+                         // console.log("hello");
+                        if (class_group.children[index].children[i].material.transparent === true) {
+                            class_group.children[index].children[i].material.transparent = false;
+                        } else {
+                            class_group.children[index].children[i].material.transparent = true;
+                        }
+                        //class_group.children[index].children[i].material.transparent = true;
+                    }
+                    index++;
+                }
+                wait_index++;   //just to slow down the rate of change
+                
+                
                 delta = clock.getDelta();
                 cameraControls.update(delta);
+                
+                
                 renderer.render(scene, camera);
             };
             
