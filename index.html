@@ -4,15 +4,32 @@
         <style>canvas { width: 100%; height: 100% }</style>
     </head>
     
-    <body>
+    <canvas id="canvas"></canvas>
+    
+    <body style="background:#fff;">
         <script src="http://mrdoob.github.com/three.js/build/three.min.js"></script>
         <script src="https://stemkoski.github.io/Three.js/js/OrbitControls.js"></script>
         <script src="js/TrackballControls.js"></script>
-        
-        
-        
+              
         <script>
             var cube_dim = 20;
+            var size = 256;
+            var canvas = document.getElementById('canvas'), ctx = canvas.getContext('2d');
+            function changeCanvas(cube_text) {
+                ctx.visibility = 'false';
+                ctx.font = '20pt Arial';
+                ctx.fillStyle = 'red';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = 'white';
+                ctx.fillRect(10, 10, canvas.width - 20, canvas.height - 20);
+                ctx.fillStyle = 'black';
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                ctx.fillText(cube_text, canvas.width / 2, canvas.height / 2);
+            }
+            
+            texture_text = new THREE.Texture(canvas);
+            var material_text = new THREE.MeshBasicMaterial({ map: texture_text });
             
             function makeCube (x, y, z, cubeColor, useImage, student_num) {  //color based on year
                 var geometry = new THREE.BoxGeometry(x, y, z);
@@ -24,16 +41,12 @@
                 if (useImage === true) {
                     var student_photo = "images/student" + student_num + ".jpg"  //load in the student number??
                     var materials = [
-                        new THREE.MeshLambertMaterial({     //x facing
-                            map: new THREE.TextureLoader().load( 'images/red.png' ),
-                            transparent: false,
-                            opacity: 0.25,
-                            color: 0xFF0000}),   
                         new THREE.MeshLambertMaterial({
                             map: new THREE.TextureLoader().load( 'images/red.png' ),
                             transparent: false,
                             opacity: 0.25,
-                            color: 0xFF0000}),
+                            color: 0xFF0000}),   
+                        material_text,
                         new THREE.MeshLambertMaterial({     //y facing
                             map: new THREE.TextureLoader().load( 'images/red.png' ),
                             transparent: false,
@@ -53,21 +66,10 @@
                             map: new THREE.TextureLoader().load( 'images/red.png' ),
                             transparent: false,
                             opacity: 0.25,
-                            color: 0xFF0000}),
-                    ];
-                    
-                    /*var materials = [];
-                    materials.push(new THREE.MeshBasicMaterial( { map: THREE.ImageUtils.loadTexture( 'images/red.png' ), transparent: false, opacity: 0.5, color: 0xFF0000 }));
-                    materials.push(new THREE.MeshBasicMaterial( { map: THREE.ImageUtils.loadTexture( 'images/red.png' ), transparent: false, opacity: 0.5, color: 0xFF0000 }));
-                    materials.push(new THREE.MeshBasicMaterial( { map: THREE.ImageUtils.loadTexture( 'images/red.png' ), transparent: false, opacity: 0.5, color: 0xFF0000 }));
-                    materials.push(new THREE.MeshBasicMaterial( { map: THREE.ImageUtils.loadTexture( 'images/red.png' ), transparent: false, opacity: 0.5, color: 0xFF0000 }));
-                    materials.push(new THREE.MeshBasicMaterial( { map: THREE.ImageUtils.loadTexture( 'images/red.png' ), transparent: false, opacity: 0.5, color: 0xFF0000 }));
-                    materials.push(new THREE.MeshBasicMaterial( { map: THREE.ImageUtils.loadTexture( 'images/red.png' ), transparent: false, opacity: 0.5, color: 0xFF0000 }));
-                    var MovingCubeMat = new THREE.MeshFaceMaterial(materials);*/
-                    
+                            color: 0xFF0000})
+                    ];                    
                     newCube = new THREE.Mesh( geometry, new THREE.MultiMaterial(materials))
                 }
-                
                 
                 return newCube;
             };
@@ -157,6 +159,7 @@
             var camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 1, 10000);
             camera.position.set(50,16,50);
             scene.add(camera);
+            
             //camera setup
             camera.position.set(10, 50, 80);
             var cameraControls;
@@ -167,7 +170,7 @@
             //add meshes to scene
             var class_group = new THREE.Object3D();
             var num_per_row = 4;
-            var number_of_students = 15;
+            var number_of_students = 14;
             
             for (k = 0; k < number_of_students; k++) {
                 var y_offset = parseInt(k/num_per_row);
@@ -177,19 +180,16 @@
                 
                 class_group.add(makeStudent(pic_number,numberYears, cube_dim*x_offset, cube_dim*y_offset, 0))
             }
-            
-            
+                        
             scene.add(class_group);
             //******************
-            /*var class_group = createStudentClass(4);    //NOT WORKING
-            scene.add(class_group);*/
             
             var clock = new THREE.Clock();
             var delta;
             
             var raycaster = new THREE.Raycaster();
             var mouse = new THREE.Vector2();
-
+            
             function onMouseMove( event ) {
 
                 // calculate mouse position in normalized device coordinates
@@ -200,14 +200,23 @@
 
             }
             
-            //class_group.children[0].visible = false;    //WORKS
-            //class_group.children[0].children[0].material.transparent = true;
-            //class_group.children[0].children[2].material.transparent = true;
+            //******CANVAS************
+            
+            /*var material_text = new THREE.MeshBasicMaterial({ map: texture_text });
+            geometry = new THREE.BoxGeometry( 20, 20, 20 );
+            mesh_text = new THREE.Mesh( geometry, material_text );
+            
+            scene.add( mesh_text );
+            mesh_text.position.set(-20,0,0);
+            canvas.width = canvas.height = size;*/
+            
+            //*************CANVAS END*************************
+            
             
             var index = 0, wait_index=0;
             //main function
             function render() {
-                requestAnimationFrame(render);                
+                requestAnimationFrame(render);       
                 
                 //***RAYCASTING****
                 // update the picking ray with the camera and mouse position
@@ -232,7 +241,6 @@
                     }*/
                     
                     for(i=0; i < class_group.children[index].children.length; i++) {
-                         // console.log("hello");
                         if (class_group.children[index].children[i].material.transparent === true) {
                             class_group.children[index].children[i].material.transparent = false;
                         } else {
@@ -244,11 +252,11 @@
                 }
                 wait_index++;   //just to slow down the rate of change
                 
+                changeCanvas("hello world");
+                texture_text.needsUpdate = true;
                 
                 delta = clock.getDelta();
                 cameraControls.update(delta);
-                
-                
                 renderer.render(scene, camera);
             };
             
