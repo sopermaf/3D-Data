@@ -10,24 +10,11 @@
         <script src="http://mrdoob.github.com/three.js/build/three.min.js"></script>
         <script src="https://stemkoski.github.io/Three.js/js/OrbitControls.js"></script>
         <script src="js/TrackballControls.js"></script>
-              
+        
         <script>
             var cube_dim = 20;
             var size = 256;
-            var canvas = document.getElementById('canvas'), ctx = canvas.getContext('2d');
-            function changeCanvas(cube_text) {
-                ctx.visibility = 'false';
-                ctx.font = '20pt Arial';
-                ctx.fillStyle = 'red';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-                ctx.fillStyle = 'white';
-                ctx.fillRect(10, 10, canvas.width - 20, canvas.height - 20);
-                ctx.fillStyle = 'black';
-                ctx.textAlign = "center";
-                ctx.textBaseline = "middle";
-                ctx.fillText(cube_text, canvas.width / 2, canvas.height / 2);
-            }
-            
+
             texture_text = new THREE.Texture(canvas);
             var material_text = new THREE.MeshBasicMaterial({ map: texture_text });
             
@@ -41,12 +28,16 @@
                 if (useImage === true) {
                     var student_photo = "images/student" + student_num + ".jpg"  //load in the student number??
                     var materials = [
-                        new THREE.MeshLambertMaterial({
-                            map: new THREE.TextureLoader().load( 'images/red.png' ),
+                        new THREE.MeshLambertMaterial({     //x facing
+                            map: new THREE.TextureLoader().load( 'images/Year1-1.png' ),
                             transparent: false,
                             opacity: 0.25,
-                            color: 0xFF0000}),   
-                        material_text,
+                            color: 0xFF0000}),
+                        new THREE.MeshLambertMaterial({     
+                        map: new THREE.TextureLoader().load( 'images/red.png' ),
+                        transparent: false,
+                        opacity: 0.25,
+                        color: 0xFF0000}),
                         new THREE.MeshLambertMaterial({     //y facing
                             map: new THREE.TextureLoader().load( 'images/red.png' ),
                             transparent: false,
@@ -139,20 +130,16 @@
             document.body.appendChild(renderer.domElement);
             
             //LIGHTING*** - NEEDED FOR PHONG MATERIALS
-            /*var light1 = new THREE.DirectionalLight( 0xffffff);
-            var light2 = new THREE.DirectionalLight(0xffffff)
+            var light1 = new THREE.DirectionalLight( 0x555555);
             light1.position.set(10, 70, 10);
-            light2.position.set(-10, 70, 0);*/
-            
+            scene.add(light1);
+             
             var ambientLight = new THREE.AmbientLight(0x111111, 20);
             ambientLight.position.set(0, 50, -5);
-            
-            //scene.add(light1);
-            //scene.add(light2);
             scene.add(ambientLight);
             
             var axisHelper = new THREE.AxisHelper(70);
-            scene.add( axisHelper );
+            //scene.add( axisHelper );
             
             //set camera and mesh positions
             // Create a camera, zoom it out from the model a bit, and add it to the scene.
@@ -164,14 +151,13 @@
             camera.position.set(10, 50, 80);
             var cameraControls;
             cameraControls = new THREE.TrackballControls(camera, renderer.domElement);
-            cameraControls.target.set( 0, 0, 0 )
+            cameraControls.target.set( 0, 0, 0 );
             
             //**********Needs to be function for dynamic input of students
             //add meshes to scene
             var class_group = new THREE.Object3D();
             var num_per_row = 4;
-            var number_of_students = 14;
-            
+            var number_of_students = 14;          
             for (k = 0; k < number_of_students; k++) {
                 var y_offset = parseInt(k/num_per_row);
                 var x_offset = k%num_per_row;
@@ -186,10 +172,8 @@
             
             var clock = new THREE.Clock();
             var delta;
-            
             var raycaster = new THREE.Raycaster();
-            var mouse = new THREE.Vector2();
-            
+            var mouse = new THREE.Vector2();     
             function onMouseMove( event ) {
 
                 // calculate mouse position in normalized device coordinates
@@ -200,21 +184,20 @@
 
             }
             
-            //******CANVAS************
-            
-            /*var material_text = new THREE.MeshBasicMaterial({ map: texture_text });
-            geometry = new THREE.BoxGeometry( 20, 20, 20 );
-            mesh_text = new THREE.Mesh( geometry, material_text );
-            
-            scene.add( mesh_text );
-            mesh_text.position.set(-20,0,0);
-            canvas.width = canvas.height = size;*/
-            
-            //*************CANVAS END*************************
-            
-            
             var index = 0, wait_index=0;
             //main function
+            
+            //KEYPRESS FUNCTION FOR CAMERA RESET
+            document.addEventListener("keydown", keyDownTextField, false);
+            function keyDownTextField(e) {
+            var keyCode = e.keyCode;
+              if (keyCode==82) {
+                cameraControls.reset();
+                cameraControls.target.set( 0, 0, 0 );
+              } 
+              //alert(e.keyCode);
+            }
+            
             function render() {
                 requestAnimationFrame(render);       
                 
@@ -251,9 +234,6 @@
                     index++;
                 }
                 wait_index++;   //just to slow down the rate of change
-                
-                changeCanvas("hello world");
-                texture_text.needsUpdate = true;
                 
                 delta = clock.getDelta();
                 cameraControls.update(delta);
