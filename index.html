@@ -21,6 +21,8 @@
                 //new technique
                 var frontface = basicMaterial;
                 var student_photo = "images/student" + student_num + ".jpg"  //load in the student number??
+                var year_result = "images/grade" + getRandomIntInclusive(1,4) + ".png";
+                
                 if (useImage) {
                     frontface = new THREE.MeshLambertMaterial({    
                                     map: new THREE.TextureLoader().load(student_photo),
@@ -37,11 +39,20 @@
                         color: cubeColor}),
                     basicMaterial,
                     //y facing
-                    basicMaterial,
+                    new THREE.MeshLambertMaterial({    
+                        map: new THREE.TextureLoader().load(year_result),
+                        transparent: true,
+                        opacity: 0.05,
+                        color: cubeColor}),
                     basicMaterial,
                     //z facing
                     frontface,
-                    basicMaterial];
+                    new THREE.MeshLambertMaterial({    
+                        map: new THREE.TextureLoader().load( 'images/personal_details_template.png' ),
+                        transparent: true,
+                        opacity: 0.05,
+                        color: cubeColor})
+                    ];
                     
                 newCube = new THREE.Mesh( geometry, new THREE.MultiMaterial(materials));
                 
