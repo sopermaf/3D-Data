@@ -12,46 +12,55 @@
         <script>
             var cube_dim = 20;
             var size = 256;
+            var transparency_level = 0.15
+            var year_colours = ["red", "yellow", "green", "blue", "purple", "orange"]
             
-            function makeCube (x, y, z, cubeColor, useImage, student_num) {  //color based on year
+            function makeCube (x, y, z, cubeColor, useImage, student_num, year_index) {  //color based on year
                 var geometry = new THREE.BoxGeometry(x, y, z);
+
                 var basicMaterial = new THREE.MeshPhongMaterial( {color: cubeColor, specular: 0x555555, shininess: 100, 
-                    emissive: 0x000000, transparent: false, opacity: 0.05} );
-               
-                //new technique
+                    emissive: 0x000000, transparent: false, opacity: transparency_level} );
                 var frontface = basicMaterial;
+                
+                //location of pictures for UV mapping to the cube
                 var student_photo = "images/student" + student_num + ".jpg"  //load in the student number??
                 var year_result = "images/grade" + getRandomIntInclusive(1,4) + ".png";
+                var date_year = "images/year" + year_index + ".png";
                 
+                //ensures the face picture is only used on the first student
                 if (useImage) {
                     frontface = new THREE.MeshLambertMaterial({    
                                     map: new THREE.TextureLoader().load(student_photo),
                                     transparent: true,
-                                    opacity: 0.05});
+                                    opacity: transparency_level});
                 }      
                 
                 var materials = [
                     //x facing
                     new THREE.MeshLambertMaterial({    
-                        map: new THREE.TextureLoader().load( 'images/Year1-1.png' ),
+                        map: new THREE.TextureLoader().load( 'images/term1.png' ),
                         transparent: true,
-                        opacity: 0.05,
+                        opacity: transparency_level,
                         color: cubeColor}),
-                    basicMaterial,
+                    new THREE.MeshLambertMaterial({    
+                        map: new THREE.TextureLoader().load(date_year),
+                        transparent: true,
+                        opacity: transparency_level,
+                        color: cubeColor}),
                     //y facing
                     new THREE.MeshLambertMaterial({    
                         map: new THREE.TextureLoader().load(year_result),
                         transparent: true,
-                        opacity: 0.05,
+                        opacity: transparency_level,
                         color: cubeColor}),
                     basicMaterial,
                     //z facing
                     frontface,
                     new THREE.MeshLambertMaterial({    
-                        map: new THREE.TextureLoader().load( 'images/personal_details_template.png' ),
+                        map: new THREE.TextureLoader().load('images/personal_details_template.png'),
                         transparent: true,
-                        opacity: 0.05,
-                        color: cubeColor})
+                        opacity: transparency_level,
+                        color: "#ccccff"})
                     ];
                     
                 newCube = new THREE.Mesh( geometry, new THREE.MultiMaterial(materials));
@@ -62,7 +71,6 @@
             //create group of year cubes for student
             function makeStudent(student_id, num_of_years, x, y, z) {
                 //setup cubes and constants
-                var year_colours = ["red", "yellow", "green", "blue", "purple", "orange"]
                 var year_group = new THREE.Object3D();       //create an empty container
                 
                 for (i = 0; i < num_of_years; i++) {
@@ -70,8 +78,9 @@
                     if (i ==0) {    //only first cube needs face
                         needs_face = true;
                     }
+
                     //create the year cube
-                    var year = makeCube(cube_dim, cube_dim, cube_dim, new THREE.Color(year_colours[i]), needs_face, student_id);
+                    var year = makeCube(cube_dim, cube_dim, cube_dim, new THREE.Color(year_colours[i]), needs_face, student_id, i+1);
                     
                     //translate it back
                     year.position.set(0,0, -(i*cube_dim));
@@ -81,11 +90,6 @@
                 }
                 
                 year_group.position.set(x, y, z);
-                //****PART OF THE STAIRCASE GEOMETRY*******
-                //var year2 = makeCube(cube_dim, cube_dim*2, cube_dim, new THREE.Color('yellow'), false, student_id);
-                //var year3 = makeCube(cube_dim, cube_dim*3, cube_dim, new THREE.Color('green'), false, student_id);
-                //year2.position.set(0, (cube_dim/2), -cube_dim);
-                //year3.position.set(0, cube_dim, -(2*cube_dim));
                 
                 return year_group;
             }
@@ -145,22 +149,46 @@
             camera.position.set(10, 50, 80);
             var cameraControls;
             cameraControls = new THREE.TrackballControls(camera, renderer.domElement);
-            cameraControls.target.set( 0, 0, 0 );
+            cameraControls.target.set(40,20,-30);
             
             //**********Needs to be function for dynamic input of students
             //add meshes to scene
             var class_group = new THREE.Object3D();
             var num_per_row = 4;
-            var number_of_students = 15;          
+            var number_of_students = 12;          
             for (k = 0; k < number_of_students; k++) {
                 var y_offset = parseInt(k/num_per_row);
                 var x_offset = k%num_per_row;
                 var pic_number = k+1;
-                var numberYears = getRandomIntInclusive(2,5);
+                var numberYears = getRandomIntInclusive(3,4);
                 
                 class_group.add(makeStudent(pic_number,numberYears, cube_dim*x_offset, cube_dim*y_offset, 0))
             }
-                        
+            
+            //******DEMO ****photo temp to demo repeated year
+            /*var temp_y1;
+            var temp_student = new THREE.Object3D();
+            var base_x = 0, base_y = 60;
+            
+            temp_y1 = makeCube (cube_dim, cube_dim, cube_dim, year_colours[0], true, 14, 1);
+            temp_y1.position.set(base_x,base_y,0);
+            temp_student.add(temp_y1);
+            
+            temp_y1 = makeCube (cube_dim, cube_dim, cube_dim, year_colours[1], true, 14, 2);
+            temp_y1.position.set(base_x,base_y,-cube_dim);
+            temp_student.add(temp_y1);
+            
+            temp_y1 = makeCube (cube_dim, cube_dim, cube_dim, year_colours[1], true, 14, 3);
+            temp_y1.position.set(base_x,base_y,-cube_dim*2);
+            temp_student.add(temp_y1);
+            
+            temp_y1 = makeCube (cube_dim, cube_dim, cube_dim, year_colours[2], true, 14, 4);
+            temp_y1.position.set(base_x,base_y,-cube_dim*3);
+            temp_student.add(temp_y1);
+            
+            class_group.add(temp_student);*/
+            //END DEMO*************
+            
             scene.add(class_group);
             //******************
             
@@ -178,7 +206,7 @@
 
             }
             
-            //STUDENT TRANSPARENCY SETTING
+            //changes the student transparency to the boolean value passed for an individual student in the class
             function setStudentTransparency (index, transparency) {                
                 for (i=0; i < class_group.children[index].children.length; i++) {
                     for (k=0; k < 6; k++) {
@@ -187,12 +215,13 @@
                 }
             }
             
+            //sets the class transparency with the passed boolean value
+            //except the student at specified index
             function demoAllSetTransparency (index, transparency) {
                 for (curr=0; curr < class_group.children.length; curr++) {
                     if (curr != index) {
                         setStudentTransparency(curr, transparency);
                     }
-                    //console.log("curr value = " + curr)
                 }
             }
             
